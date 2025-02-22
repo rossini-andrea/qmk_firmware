@@ -1,1 +1,3 @@
-DEFAULT_FOLDER = redox/rev1/base
+DEFAULT_FOLDER = redox/waffle/base
+CAPS_WORD_ENABLE = yes
+

@@ -3,7 +3,12 @@
         "device_version": "1.0.0"
     },
     "matrix_pins": {
-        "cols": ["F5", "F6", "F7", "B1", "B3", "B2", "B6"],
+        "cols": [
+          "B6", "B2",
+          "B3", "B1",
+          "F7", "F6",
+          "F5"
+        ],
         "rows": ["D4", "D7", "E6", "B4", "B5"]
     },
     "diode_direction": "COL2ROW",
