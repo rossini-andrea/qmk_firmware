@@ -10,27 +10,13 @@
 
 static uint32_t blink_tick;
 
-uint32_t layer_led_blink(uint32_t trigger_time, void *cb_arg) {
-    uint32_t tick = blink_tick;
-
-    if (tick) {
-        gpio_toggle_pin(LED_LAYER_PIN);
-    } else {
-        gpio_write_pin(LED_LAYER_PIN, 0);
-    }
-
-    return tick;
-}
-
 layer_state_t layer_state_set_kb(layer_state_t state) {
-    static deferred_token my_token = 0;
     state = layer_state_set_user(state);
 
     switch (get_highest_layer(state)) {
         case 0:
             blink_tick = 0;
-            my_token = 0;
-            return state;
+            break;
         case 1:
             blink_tick = 500;
             break;
@@ -40,10 +26,6 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
         default:
             blink_tick = 120;
             break;
-    }
-
-    if (!my_token) {
-        my_token = defer_exec(blink_tick, layer_led_blink, NULL);
     }
 
     return state;
@@ -69,11 +51,22 @@ void housekeeping_task_user(void) {
     if (is_keyboard_master()) {
         // Interact with slave every 500ms
         static uint32_t last_sync = 0;
+        static uint32_t last_blink = 0;
 
         if (timer_elapsed32(last_sync) > 500) {
             if(transaction_rpc_send(KEYBOARD_SYNC_CAPS_WORD, sizeof(bool), &caps_word_active)) {
                 last_sync = timer_read32();
             }
+        }
+
+        // Blink layer LED
+        if (blink_tick) {
+            if (timer_elapsed32(last_blink) > blink_tick) {
+                gpio_toggle_pin(LED_LAYER_PIN);
+                last_blink = timer_read32();
+            }
+        } else {
+            gpio_write_pin(LED_LAYER_PIN, 0);
         }
     }
 }

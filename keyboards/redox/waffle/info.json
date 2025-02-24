@@ -11,7 +11,7 @@
   "features":{
     "bootmagic": true,
     "command": true,
-    "deferred_exec": true,
+    "deferred_exec": false,
     "console": false,
     "mousekey": true,
     "extrakey": true,
