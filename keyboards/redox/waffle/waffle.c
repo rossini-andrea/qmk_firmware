@@ -3,9 +3,10 @@
 
 #include "quantum.h"
 #include "pin_defs.h"
+#include "transactions.h"
 
 #define LED_LAYER_PIN C6
-#define LED_CAPS_WORD_PIN D5
+#define LED_CAPS_WORD_PIN F4
 
 static uint32_t blink_tick;
 
@@ -48,11 +49,32 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
     return state;
 }
 
-void caps_word_set_user(bool active) {
-    if (!active) {
+void user_sync_caps_word_handler(uint8_t in_buflen, const void* in_data, uint8_t out_buflen, void* out_data) {
+    bool active = *((bool*)in_data);
+
+    if (active) {
         gpio_write_pin_high(LED_CAPS_WORD_PIN);
     } else {
         gpio_write_pin_low(LED_CAPS_WORD_PIN);
+    }
+}
+
+static bool caps_word_active = false;
+
+void caps_word_set_user(bool active) {
+    caps_word_active = active;
+}
+
+void housekeeping_task_user(void) {
+    if (is_keyboard_master()) {
+        // Interact with slave every 500ms
+        static uint32_t last_sync = 0;
+
+        if (timer_elapsed32(last_sync) > 500) {
+            if(transaction_rpc_send(KEYBOARD_SYNC_CAPS_WORD, sizeof(bool), &caps_word_active)) {
+                last_sync = timer_read32();
+            }
+        }
     }
 }
 
@@ -63,4 +85,8 @@ void keyboard_pre_init_kb(void) {
     // Set our LED pins as output
     gpio_set_pin_output(LED_LAYER_PIN);
     gpio_set_pin_output(LED_CAPS_WORD_PIN);
+}
+
+void keyboard_post_init_kb(void) {
+    transaction_register_rpc(KEYBOARD_SYNC_CAPS_WORD, user_sync_caps_word_handler);
 }
