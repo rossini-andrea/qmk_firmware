@@ -3,7 +3,7 @@
 
 #pragma once
 
+#define SPLIT_USB_DETECT
+#define MASTER_LEFT
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
-#define SPLIT_LED_STATE_ENABLE
-#define LED_CAPS_LOCK_PIN F4
 

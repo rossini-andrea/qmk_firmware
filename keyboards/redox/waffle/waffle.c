@@ -5,6 +5,7 @@
 #include "pin_defs.h"
 
 #define LED_LAYER_PIN C6
+#define LED_CAPS_WORD_PIN D5
 
 static uint32_t blink_tick;
 
@@ -33,10 +34,10 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
             blink_tick = 500;
             break;
         case 2:
-            blink_tick = 300;
+            blink_tick = 250;
             break;
         default:
-            blink_tick = 200;
+            blink_tick = 120;
             break;
     }
 
@@ -47,10 +48,19 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
     return state;
 }
 
+void caps_word_set_user(bool active) {
+    if (!active) {
+        gpio_write_pin_high(LED_CAPS_WORD_PIN);
+    } else {
+        gpio_write_pin_low(LED_CAPS_WORD_PIN);
+    }
+}
+
 void keyboard_pre_init_kb(void) {
     // Call the user pre init code.
     keyboard_pre_init_user();
 
     // Set our LED pins as output
     gpio_set_pin_output(LED_LAYER_PIN);
+    gpio_set_pin_output(LED_CAPS_WORD_PIN);
 }
